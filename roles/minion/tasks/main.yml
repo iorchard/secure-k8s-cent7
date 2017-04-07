@@ -1,0 +1,87 @@
+---
+- name: Install kubernetes node package
+  yum: 
+    name: kubernetes-node 
+    state: latest
+
+- name: Create a directory for k8s certs
+  file: 
+    path: /etc/ssl/k8s
+    state: directory
+    mode: 0755
+    owner: kube
+    group: kube
+
+- name: Copy k8s cert files into /etc/ssl/k8s/
+  copy: 
+    src: k8s-certs/ 
+    dest: /etc/ssl/k8s/
+    mode: 0600
+    owner: kube
+    group: kube
+    force: yes
+
+- name: Delete kubeconfig if exists.
+  file:
+    path: "{{ kubeconfig }}"
+    state: absent
+
+- name: Set cluster on kubeconfig
+  shell: >
+    kubectl config --kubeconfig={{ kubeconfig }} \
+    set-cluster {{ kubic_user }} \
+    --server=https://{{ master_ip }}:{{ master_port }} \
+    --certificate-authority=/etc/ssl/k8s/ca.pem \
+    --embed-certs=true
+
+- name: Set credential on kubeconfig
+  shell: >
+    kubectl config --kubeconfig={{ kubeconfig }} \
+    set-credentials kubelet \
+    --client-certificate=/etc/ssl/k8s/client.pem \
+    --client-key=/etc/ssl/k8s/client-key.pem \
+    --embed-certs=true \
+    --token=$(cut -d',' -f1 /etc/ssl/k8s/tokens.csv)
+
+- name: Set context on kubeconfig
+  shell: >
+    kubectl config --kubeconfig={{ kubeconfig }} \
+    set-context kubelet-context \
+    --cluster={{ kubic_user }} \
+    --user=kubelet
+
+- name: Use context on kubeconfig
+  shell: >
+    kubectl config --kubeconfig={{ kubeconfig }} \
+    use-context kubelet-context
+
+- name: Configure kubelet
+  template: 
+    src: "{{ item }}.j2"
+    dest: "/etc/kubernetes/{{ item }}"
+  with_items:
+    - config
+    - kubelet
+    - proxy
+
+- name: Stop minion dynamic duo
+  service: 
+    name: "{{ item }}"
+    state: stopped
+    enabled: yes
+  with_items: "{{ dynamic_duo }}"
+
+- name: Copy kube{let,-proxy} lastest binaries
+  copy: 
+    src: "{{ item }}"
+    dest: "/usr/bin/{{ item }}"
+    mode: 0755
+  with_items: "{{ dynamic_duo }}"
+
+- name: Enable and start minion dynamic duo
+  service: 
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  with_items: "{{ dynamic_duo }}"
+...

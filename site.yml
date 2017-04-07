@@ -1,0 +1,45 @@
+---
+# This playbook deploys kubernetes stack on centos 7.
+
+- name: Apply common configuration to all nodes
+  hosts: all
+
+  roles:
+    - common
+
+- name: Install and configure docker container engine
+  hosts: all
+
+  roles:
+    - docker
+
+- name: Install and configure etcd KVS on a master
+  hosts: master
+
+  roles:
+    - etcd
+
+- name: Install and configure kubernetes master
+  hosts: master
+
+  roles:
+    - master
+
+- name: Install and configure flannel overlay network on all minions
+  hosts: minion
+
+  roles:
+    - flannel
+
+- name: Run private registry - D'Artagnan on master
+  hosts: master
+
+  roles:
+    - dartagnan
+
+- name: Install and configure kubernetes minion
+  hosts: minion
+
+  roles:
+    - minion
+...

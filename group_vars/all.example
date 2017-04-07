@@ -1,0 +1,13 @@
+---
+timezone: Asia/Seoul
+master_ip: 192.168.24.51
+master_port: 6443
+etcd_ip: 192.168.24.51
+etcd_port: 2379
+etcd_key: /kubic/network
+kubic_user: kubic
+# Create hash password with 'mkpasswd -m sha-512' from whois debian package.
+kubic_password: $6$3JWOLWjzYIO6JbOW$bI8Ji9XzSLjTuYmbdDYV21DYgILE0nDjg74GbloUCogYA8BDj4DzwQzCAhMDJvh/if.5sr61L3yZQb4v2BPPh/
+registry_ip: 192.168.24.51
+registry_port: 5000
+...

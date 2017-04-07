@@ -1,0 +1,8 @@
+---
+pod_image_repo: "{{ registry_ip }}:{{ registry_port }}/pause"
+dynamic_duo:
+  - kubelet
+  - kube-proxy
+kubeconfig: "/var/lib/kubelet/kubeconfig"
+kubelet_args: "--cluster-dns=10.24.0.10 --cluster-domain={{ kubic_user }}.local --enable_server=true --register-node=true --kubeconfig={{ kubeconfig }} --node-status-update-frequency=5s --cgroup-driver=systemd"
+...

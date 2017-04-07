@@ -1,0 +1,38 @@
+---
+- name: Delete a directory for registry volume.
+  file:
+    path: /srv/docker/images
+    state: absent
+
+- name: Create a directory for registry volume. 
+  file:
+    path: /srv/docker/images
+    state: directory 
+    mode: 0755
+
+# no need to run since selinux is disabled.
+#- name: chcon on /srv/docker/images for container to write in.
+#  shell: chcon -Rt svirt_sandbox_file_t /srv/docker/images
+
+- name: Run a private docker registry - D'Artagnan
+  docker_container:
+    name: dartagnan
+    state: started
+    image: registry:2
+    ports:
+      - "{{ registry_ip }}:{{ registry_port }}:5000/tcp"
+    volumes:
+      - /srv/docker/images:/var/lib/registry:rw
+
+- name: Pull pause image from kubernetes/pause
+  command: docker pull kubernetes/pause
+
+- name: Tag kubernetes/pause to {{ registry_ip }}:{{ registry_port }}/pause.
+  command: |
+    docker tag kubernetes/pause {{ registry_ip }}:{{ registry_port }}/pause
+
+- name: Push pause image to registry
+  command: |
+    docker push {{ registry_ip }}:{{ registry_port }}/pause
+  ignore_errors: yes
+...

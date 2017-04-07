@@ -1,0 +1,66 @@
+---
+- name: Create a directory for etcd certs
+  file: 
+    path: /etc/ssl/etcd 
+    state: directory
+
+- name: Copy etcd cert files into /etc/ssl/etcd/
+  copy: 
+    src: etcd-certs/ 
+    dest: /etc/ssl/etcd/
+    force: yes
+
+- name: Delete etcd data directory.
+  file: 
+    path: /var/lib/etcd
+    state: absent
+
+- name: Run a etcd container
+  docker_container:
+    name: etcd
+    state: started
+    restart: yes
+    image: quay.io/coreos/etcd
+    ports:
+      - "4001:4001"
+      - "2380:2380"
+      - "2379:2379"
+    volumes:
+      - /etc/ssl/etcd:/etc/ssl/certs:ro
+      - /var/lib/etcd:/etcd.etcd
+    command: >
+      etcd 
+      --name etcd
+      --trusted-ca-file=/etc/ssl/certs/ca.pem
+      --cert-file=/etc/ssl/certs/server.pem
+      --key-file=/etc/ssl/certs/server-key.pem
+      --client-cert-auth=1
+      --peer-trusted-ca-file=/etc/ssl/certs/ca.pem
+      --peer-cert-file=/etc/ssl/certs/server.pem
+      --peer-key-file=/etc/ssl/certs/server-key.pem
+      --peer-client-cert-auth=1
+      --advertise-client-urls https://{{ etcd_ip }}:2379,https://{{ etcd_ip }}:4001
+      --listen-client-urls https://0.0.0.0:2379,https://0.0.0.0:4001
+      --initial-advertise-peer-urls https://{{ etcd_ip }}:2380
+      --listen-peer-urls https://0.0.0.0:2380
+      --initial-cluster-token kubic-etcd-cluster
+      --initial-cluster etcd=https://{{ etcd_ip }}:2380
+      --initial-cluster-state new
+
+- name: Copy etcdctl from etcd container.
+  shell: docker cp etcd:/usr/local/bin/etcdctl /usr/local/bin/etcdctl
+
+- name: Copy flannel overlay network config.
+  copy: 
+    src: flannel-config.json 
+    dest: /tmp/flannel-config.json
+
+- name: Add flannel overlay network config to etcd datastore.
+  shell: >
+    etcdctl 
+    --endpoints https://{{ etcd_ip }}:{{ etcd_port }} 
+    --cert-file /etc/ssl/etcd/client.pem
+    --key-file /etc/ssl/etcd/client-key.pem
+    --ca-file /etc/ssl/etcd/ca.pem 
+    set {{ etcd_key }}/config < /tmp/flannel-config.json
+...

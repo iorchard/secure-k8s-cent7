@@ -1,0 +1,90 @@
+---
+- name: Stop containers if running.
+  shell: docker stop $(docker ps -q)
+  ignore_errors: yes
+
+- name: Stop docker engine if it is running.
+  service:
+    name: docker
+    state: stopped
+  ignore_errors: yes
+
+- name: Delete /var/lib/docker
+  file: 
+    path: /var/lib/docker
+    state: absent
+
+- name: Delete /etc/sysconfig/docker-storage
+  file: 
+    path: /etc/sysconfig/docker-storage
+    state: absent
+
+- name: Delete docker/docker-pool
+  lvol: 
+    vg: docker
+    lv: docker-pool
+    state: absent
+    force: yes
+
+- name: Install docker container engine package
+  yum: 
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - docker
+    - python-pip
+
+- name: Put /etc/sysconfig/docker file.
+  template:
+    src: docker.j2
+    dest: /etc/sysconfig/docker 
+
+- name: Check for {{ docker_devs }}
+  command: parted -s {{ docker_devs }} print {{ docker_devs_partno }}
+  register: docker_lvm
+  failed_when: docker_lvm.rc is not defined
+  changed_when: >
+    docker_lvm.stdout == "Error: partition does not exists."
+
+- name: Get the free space for {{ docker_devs }}
+  shell: "parted -m {{ docker_devs }} unit s print free|grep 'free;' |tail -1 |cut -f2 -d':'"
+  register: mkpart_start
+
+- name: Create {{ docker_devs }}{{ docker_devs_partno }}
+  command: parted -s {{ docker_devs }} mkpart primary {{ mkpart_start.stdout }} 100%
+  when: docker_lvm.rc != 0
+
+- name: Add LVM flag to {{ docker_devs}}{{ docker_devs_partno }}
+  command: parted -s {{ docker_devs}} set {{ docker_devs_partno }} lvm on
+  when: docker_lvm.rc != 0
+
+- name: Create VG docker with PV {{ docker_devs }}{{ docker_devs_partno }}
+  lvg: 
+    vg: docker 
+    pvs: "{{ docker_devs }}{{ docker_devs_partno }}"
+
+- name: Put /etc/sysconfig/docker-storage-setup file.
+  template: 
+    src: docker-storage-setup.j2 
+    dest: /etc/sysconfig/docker-storage-setup
+
+- name: Run docker-storage-setup
+  command: docker-storage-setup
+
+- name: Enable and Start docker
+  service: 
+    name: docker 
+    state: restarted
+    enabled: yes
+
+- name: Set up the operator user '{{ kubic_user }}'
+  user: 
+    name: "{{ kubic_user }}"
+    comment: "KUBIC user" 
+    groups: wheel,dockerroot 
+    append: yes
+    password: "{{ kubic_password }}"
+
+- name: Install docker-py module.
+  shell: /usr/bin/pip install docker-py
+...
