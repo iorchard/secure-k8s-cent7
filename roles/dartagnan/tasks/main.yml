@@ -14,6 +14,11 @@
 #- name: chcon on /srv/docker/images for container to write in.
 #  shell: chcon -Rt svirt_sandbox_file_t /srv/docker/images
 
+- name: Remove a private docker registry - D'Artagnan if exists.
+  docker_container:
+    name: dartagnan
+    state: absent
+
 - name: Run a private docker registry - D'Artagnan
   docker_container:
     name: dartagnan
