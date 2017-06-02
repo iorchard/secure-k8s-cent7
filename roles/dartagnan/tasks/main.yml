@@ -28,6 +28,7 @@
       - "{{ registry_ip }}:{{ registry_port }}:5000/tcp"
     volumes:
       - /srv/docker/images:/var/lib/registry:rw
+    restart_policy: always
 
 - name: Pull pause image from kubernetes/pause
   command: docker pull kubernetes/pause
