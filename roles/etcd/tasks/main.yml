@@ -20,6 +20,7 @@
     name: etcd
     state: started
     restart: yes
+    restart_policy: always
     image: quay.io/coreos/etcd
     ports:
       - "4001:4001"
