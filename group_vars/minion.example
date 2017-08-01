@@ -1,4 +1,4 @@
 ---
-docker_devs: /dev/xvda
+docker_devs: /dev/sda
 docker_devs_partno: 3
 ...

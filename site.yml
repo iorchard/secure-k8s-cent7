@@ -7,12 +7,6 @@
   roles:
     - common
 
-- name: Install and configure docker container engine
-  hosts: all
-
-  roles:
-    - docker
-
 - name: Install and configure etcd KVS on a master
   hosts: master
 
@@ -30,6 +24,12 @@
 
   roles:
     - flannel
+
+- name: Install and configure docker container engine
+  hosts: all
+
+  roles:
+    - docker
 
 - name: Run private registry - D'Artagnan on master
   hosts: master
