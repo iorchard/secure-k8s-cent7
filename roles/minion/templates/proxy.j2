@@ -4,4 +4,4 @@
 # default config should be adequate
 
 # Add your own!
-KUBE_PROXY_ARGS="--kubeconfig={{ kubeconfig }}"
+KUBE_PROXY_ARGS="--kubeconfig={{ kubeconfig }} --hostname-override={{ ansible_default_ipv4.address }} --cluster-cidr={{ cluster_cidr }}"

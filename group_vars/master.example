@@ -3,4 +3,6 @@ bash_aliases:
       - { name: e, value: "etcdctl --endpoints {{ etcd_ip }}:2379"}
       - { name: kube, value: "kubectl -s {{ master_ip }}:8080" }
       - { name: watch, value: 'watch ' }
+docker_devs: /dev/xvda
+docker_devs_partno: 3
 ...

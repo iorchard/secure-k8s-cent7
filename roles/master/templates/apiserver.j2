@@ -17,7 +17,7 @@ KUBE_API_ADDRESS="--insecure-bind-address=0.0.0.0"
 KUBE_ETCD_SERVERS="--etcd-servers=https://{{ etcd_ip }}:{{ etcd_port }} --etcd-cafile=/etc/ssl/etcd/ca.pem --etcd-certfile=/etc/ssl/etcd/server.pem --etcd-keyfile=/etc/ssl/etcd/server-key.pem"
 
 # Address range to use for services
-KUBE_SERVICE_ADDRESSES="--service-cluster-ip-range={{ cluster_ip_cidr }}"
+KUBE_SERVICE_ADDRESSES="--service-cluster-ip-range={{ cluster_cidr }}"
 
 # default admission control policies
 KUBE_ADMISSION_CONTROL="--admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota"

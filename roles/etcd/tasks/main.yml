@@ -52,8 +52,8 @@
   shell: docker cp etcd:/usr/local/bin/etcdctl /usr/local/bin/etcdctl
 
 - name: Copy flannel overlay network config.
-  copy: 
-    src: flannel-config.json 
+  template: 
+    src: flannel-config.j2
     dest: /tmp/flannel-config.json
 
 - name: Add flannel overlay network config to etcd datastore.
