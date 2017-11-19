@@ -15,6 +15,11 @@
     path: /var/lib/etcd
     state: absent
 
+- name: Remove etcd container
+  docker_container:
+    name: etcd
+    state: absent
+
 - name: Run an etcd container
   docker_container:
     name: etcd

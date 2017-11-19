@@ -11,6 +11,7 @@
     - lvm2
     - parted
     - ntp
+    - ca-certificates
     - bind-utils
     - epel-release
 

@@ -23,4 +23,4 @@ KUBE_SERVICE_ADDRESSES="--service-cluster-ip-range={{ cluster_cidr }}"
 KUBE_ADMISSION_CONTROL="--admission-control=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,ResourceQuota"
 
 # Add your own!
-KUBE_API_ARGS="--kubelet-https=true --client-ca-file=/etc/ssl/k8s/ca.pem --tls-cert-file=/etc/ssl/k8s/server.pem --tls-private-key-file=/etc/ssl/k8s/server-key.pem --token-auth-file=/etc/ssl/k8s/tokens.csv --allow-privileged=true"
+KUBE_API_ARGS="--kubelet-https=true --client-ca-file=/etc/ssl/k8s/ca.pem --tls-cert-file=/etc/ssl/k8s/server.pem --tls-private-key-file=/etc/ssl/k8s/server-key.pem --token-auth-file=/etc/ssl/k8s/tokens.csv --allow-privileged=true --anonymous-auth=false"

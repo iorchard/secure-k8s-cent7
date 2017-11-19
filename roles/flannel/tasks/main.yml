@@ -35,4 +35,17 @@
     name: flanneld 
     state: restarted 
     enabled: yes
+
+- name: Stop docker daemon
+  service:
+    name: docker
+    state: stopped
+
+- name: Delete docker0 interface.
+  command: ip link del docker0
+
+- name: Start docker daemon
+  service:
+    name: docker
+    state: started
 ...
