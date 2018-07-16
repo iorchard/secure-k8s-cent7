@@ -85,6 +85,6 @@
     append: yes
     password: "{{ kubic_password }}"
 
-- name: Install docker-py module.
-  shell: /usr/bin/pip install docker-py
+- name: Install docker python module.
+  shell: /usr/bin/pip install docker
 ...
