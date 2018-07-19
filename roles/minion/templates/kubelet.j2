@@ -11,7 +11,7 @@ KUBELET_ADDRESS="--address=0.0.0.0"
 KUBELET_HOSTNAME="--hostname-override={{ ansible_default_ipv4.address }}"
 
 # location of the api-server
-# KUBELET_API_SERVER="--api-servers=https://{{ master_ip }}:{{ master_port }}"
+KUBELET_API_SERVER="--api-servers=https://{{ master_ip }}:{{ master_port }}"
 
 # pod infrastructure container
 KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image={{ pod_image_repo }}"
